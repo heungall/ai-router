@@ -22,7 +22,7 @@ export default function PromptOutput({ result }: PromptOutputProps) {
   const originalIsEfficient = originalTokens <= optimizedTokens;
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(result.optimizedPrompt);
+    await navigator.clipboard.writeText(result!.optimizedPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
