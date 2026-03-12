@@ -20,7 +20,7 @@ export default function TranslationPromptOutput({
   if (!result) return null;
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(result.translationPrompt);
+    await navigator.clipboard.writeText(result!.translationPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
