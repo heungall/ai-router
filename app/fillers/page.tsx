@@ -58,7 +58,7 @@ export default function FillersPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
-        <p className="text-xs text-slate-400">질문에서 제거할 한국어 필러 단어를 관리합니다.</p>
+        <p className="text-xs text-slate-400">질문에서 제거할 한국어 필터 단어를 관리합니다.</p>
 
         {/* Add */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
@@ -68,7 +68,7 @@ export default function FillersPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="필러 단어 추가"
+              placeholder="필터 단어 추가"
               className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
             <button
@@ -104,7 +104,7 @@ export default function FillersPage() {
             ))}
             {fillers.length === 0 && (
               <li className="px-4 py-6 text-xs text-slate-300 text-center">
-                필러 단어가 없습니다.
+                필터 단어가 없습니다.
               </li>
             )}
           </ul>

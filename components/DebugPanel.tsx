@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { GeneratedPrompt } from "@/lib/generatePrompt";
-import { estimateTokens, estimateCost } from "@/lib/estimateTokens";
+import { estimateTokens } from "@/lib/estimateTokens";
 
 interface DebugPanelProps {
   result: GeneratedPrompt | null;
@@ -35,7 +35,6 @@ export default function DebugPanel({ result }: DebugPanelProps) {
   const originalTokens = estimateTokens(originalQuestion);
   const optimizedTokens = estimateTokens(optimizedPrompt);
   const savedTokens = originalTokens - optimizedTokens;
-  const savedPct = Math.round((savedTokens / originalTokens) * 100);
 
   return (
     <details className="group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -47,7 +46,7 @@ export default function DebugPanel({ result }: DebugPanelProps) {
       <div className="px-4 pb-3 pt-1 border-t border-slate-100">
         <Row label="원본 질문">{originalQuestion}</Row>
 
-        <Row label="제거된 필러">
+        <Row label="제거된 필터">
           {fillerResult.removedFillers.length > 0 ? (
             <div className="flex flex-wrap gap-1">
               {fillerResult.removedFillers.map((f) => (
@@ -76,20 +75,20 @@ export default function DebugPanel({ result }: DebugPanelProps) {
           </div>
         </Row>
 
-        <Row label="토큰 추정">
+        <Row label="Input Token 추정">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-slate-400">원문 (한국어)</span>
-              <span className="font-mono text-slate-600">~{originalTokens} <span className="text-slate-300">({estimateCost(originalTokens)})</span></span>
+              <span className="font-mono text-slate-600">~{originalTokens} tokens</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400">최적화 프롬프트</span>
-              <span className="font-mono text-slate-600">~{optimizedTokens} <span className="text-slate-300">({estimateCost(optimizedTokens)})</span></span>
+              <span className="font-mono text-slate-600">~{optimizedTokens} tokens</span>
             </div>
             {savedTokens > 0 ? (
               <div className="flex items-center justify-between">
                 <span className="text-slate-400">절감</span>
-                <span className="font-mono text-emerald-600">−{savedTokens} tokens ({savedPct}%)</span>
+                <span className="font-mono text-emerald-600">−{savedTokens} tokens</span>
               </div>
             ) : (
               <div className="flex items-center justify-between">
@@ -106,7 +105,6 @@ export default function DebugPanel({ result }: DebugPanelProps) {
                 ? "💡 원문(한국어)이 더 효율적입니다."
                 : "✅ 번역+템플릿 프롬프트가 더 효율적입니다."}
             </div>
-            <p className="text-slate-300 text-xs">* claude-sonnet-4-6 기준 $3.00/1M input tokens</p>
           </div>
         </Row>
       </div>
