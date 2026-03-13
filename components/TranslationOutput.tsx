@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { repairMarkdown } from "@/lib/repairMarkdown";
 
 interface TranslationOutputProps {
   text: string | null;
@@ -15,8 +18,10 @@ export default function TranslationOutput({ text }: TranslationOutputProps) {
 
   if (!text) return null;
 
+  const repairedText = repairMarkdown(text);
+
   async function handleCopy() {
-    await navigator.clipboard.writeText(text!);
+    await navigator.clipboard.writeText(repairedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -38,9 +43,11 @@ export default function TranslationOutput({ text }: TranslationOutputProps) {
           {copied ? "복사됨!" : "복사"}
         </button>
       </div>
-      <pre className="px-4 py-4 text-sm text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">
-        {text}
-      </pre>
+      <div className="px-4 py-4 text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-pre:bg-slate-100 prose-pre:rounded-lg prose-code:text-pink-600 prose-code:before:content-none prose-code:after:content-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {repairedText}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }

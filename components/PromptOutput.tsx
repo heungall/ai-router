@@ -8,8 +8,11 @@ interface PromptOutputProps {
   result: GeneratedPrompt | null;
 }
 
+const MARKDOWN_SUFFIX = "\nOutput: Markdown only. No extra text.";
+
 export default function PromptOutput({ result }: PromptOutputProps) {
   const [copied, setCopied] = useState(false);
+  const [markdownOn, setMarkdownOn] = useState(false);
 
   useEffect(() => {
     setCopied(false);
@@ -17,12 +20,16 @@ export default function PromptOutput({ result }: PromptOutputProps) {
 
   if (!result) return null;
 
+  const finalPrompt = markdownOn
+    ? result.optimizedPrompt + MARKDOWN_SUFFIX
+    : result.optimizedPrompt;
+
   const originalTokens = estimateTokens(result.originalQuestion);
-  const optimizedTokens = estimateTokens(result.optimizedPrompt);
+  const optimizedTokens = estimateTokens(finalPrompt);
   const originalIsEfficient = originalTokens <= optimizedTokens;
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(result!.optimizedPrompt);
+    await navigator.clipboard.writeText(finalPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -33,19 +40,31 @@ export default function PromptOutput({ result }: PromptOutputProps) {
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
           생성된 프롬프트
         </span>
-        <button
-          onClick={handleCopy}
-          className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-            copied
-              ? "bg-green-100 text-green-700"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-          }`}
-        >
-          {copied ? "복사됨!" : "복사"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setMarkdownOn(!markdownOn)}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+              markdownOn
+                ? "bg-purple-100 text-purple-700"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {markdownOn ? "MD ✓" : "MD"}
+          </button>
+          <button
+            onClick={handleCopy}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+              copied
+                ? "bg-green-100 text-green-700"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {copied ? "복사됨!" : "복사"}
+          </button>
+        </div>
       </div>
       <pre className="px-4 py-4 text-sm text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">
-        {result.optimizedPrompt}
+        {finalPrompt}
       </pre>
       <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 space-y-2">
         <p className="text-xs text-slate-400">

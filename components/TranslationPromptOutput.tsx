@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { TranslationPrompt } from "@/lib/generateTranslationPrompt";
 
 interface TranslationPromptOutputProps {
@@ -42,9 +44,11 @@ export default function TranslationPromptOutput({
           {copied ? "복사됨!" : "복사"}
         </button>
       </div>
-      <pre className="p-4 text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
-        {result.translationPrompt}
-      </pre>
+      <div className="p-4 text-sm text-gray-800 leading-relaxed prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:rounded-lg prose-code:text-pink-600 prose-code:before:content-none prose-code:after:content-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {result.translationPrompt}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }
