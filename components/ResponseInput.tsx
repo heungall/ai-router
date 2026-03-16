@@ -19,22 +19,22 @@ export default function ResponseInput({ onSubmit, disabled }: ResponseInputProps
   const isEmpty = !text.trim() || !!disabled;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Claude의 영어 응답을 여기에 붙여넣으세요"
         rows={5}
-        className="w-full resize-none text-sm text-slate-800 placeholder-slate-300 focus:outline-none leading-relaxed px-4 pt-4 pb-2"
+        className="w-full resize-none text-sm text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none leading-relaxed px-4 pt-4 pb-2"
       />
-      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50">
-        <span className="text-xs text-slate-300">{text.length}자</span>
+      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <span className="text-xs text-slate-300 dark:text-slate-600">{text.length}자</span>
         <div className="flex items-center gap-2">
           {text && (
             <button
               type="button"
               onClick={() => setText("")}
-              className="text-xs text-slate-400 hover:text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
               지우기
             </button>

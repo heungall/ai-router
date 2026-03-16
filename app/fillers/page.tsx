@@ -40,17 +40,17 @@ export default function FillersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <a href="/" className="text-slate-400 hover:text-slate-600 transition-colors text-sm">←</a>
-            <span className="text-sm font-semibold text-slate-800">필터 단어 관리</span>
+            <a href="/" className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors text-sm">←</a>
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">필터 단어 관리</span>
           </div>
           <button
             type="button"
             onClick={handleReset}
-            className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+            className="text-xs text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 transition-colors"
           >
             기본값으로 초기화
           </button>
@@ -58,10 +58,10 @@ export default function FillersPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
-        <p className="text-xs text-slate-400">질문에서 제거할 한국어 필터 단어를 관리합니다.</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">질문에서 제거할 한국어 필터 단어를 관리합니다.</p>
 
         {/* Add */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
           <div className="flex gap-2">
             <input
               type="text"
@@ -69,7 +69,7 @@ export default function FillersPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="필터 단어 추가"
-              className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="flex-1 text-sm border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
             <button
               type="button"
@@ -83,27 +83,27 @@ export default function FillersPage() {
         </div>
 
         {/* List */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               목록 ({fillers.length}개)
             </span>
           </div>
-          <ul className="divide-y divide-slate-50">
+          <ul className="divide-y divide-slate-50 dark:divide-slate-700/50">
             {fillers.map((filler) => (
-              <li key={filler} className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
-                <span className="text-sm text-slate-700 font-mono">{filler}</span>
+              <li key={filler} className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                <span className="text-sm text-slate-700 dark:text-slate-300 font-mono">{filler}</span>
                 <button
                   type="button"
                   onClick={() => handleDelete(filler)}
-                  className="text-xs text-slate-300 hover:text-red-500 transition-colors px-2 py-1 rounded"
+                  className="text-xs text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors px-2 py-1 rounded"
                 >
                   삭제
                 </button>
               </li>
             ))}
             {fillers.length === 0 && (
-              <li className="px-4 py-6 text-xs text-slate-300 text-center">
+              <li className="px-4 py-6 text-xs text-slate-300 dark:text-slate-600 text-center">
                 필터 단어가 없습니다.
               </li>
             )}

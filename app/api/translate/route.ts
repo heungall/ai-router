@@ -5,21 +5,21 @@ import {
   parseTable,
   reassembleTable,
 } from "@/lib/markdownShield";
+import { translateWithFallback } from "@/lib/translationProviders";
 
 const CHUNK_LIMIT = 480;
+const MAX_INPUT_LENGTH = 50_000;
 
 function splitIntoChunks(text: string): string[] {
   if (text.length <= CHUNK_LIMIT) return [text];
 
   const chunks: string[] = [];
-  // Split on sentence boundaries first (\n, ., !, ?)
   const sentences = text.split(/(?<=[.!?\n])\s+/);
   let current = "";
 
   for (const sentence of sentences) {
     if ((current + sentence).length > CHUNK_LIMIT) {
       if (current) chunks.push(current.trim());
-      // If single sentence exceeds limit, hard-split it
       if (sentence.length > CHUNK_LIMIT) {
         for (let i = 0; i < sentence.length; i += CHUNK_LIMIT) {
           chunks.push(sentence.slice(i, i + CHUNK_LIMIT));
@@ -36,11 +36,10 @@ function splitIntoChunks(text: string): string[] {
   return chunks;
 }
 
-async function translateChunk(text: string, langpair: string): Promise<string> {
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.responseData?.translatedText ?? text;
+/** Parse "ko|en" style langpair into { from, to } */
+function parseLangpair(langpair: string): { from: string; to: string } {
+  const [from, to] = langpair.split("|");
+  return { from, to };
 }
 
 /**
@@ -48,61 +47,72 @@ async function translateChunk(text: string, langpair: string): Promise<string> {
  */
 async function translateTable(
   tableStr: string,
-  langpair: string
-): Promise<string> {
+  from: string,
+  to: string
+): Promise<{ text: string; provider: string }> {
   const { header, separator, body } = parseTable(tableStr);
 
-  // Collect all cells that need translation
   const allCells = [...header, ...body.flat()];
-
-  // Skip empty cells and separator-like cells
   const toTranslate = allCells.filter(
     (c) => c.trim() && !/^-+$/.test(c.trim())
   );
 
-  // Batch translate: send all cells as one request separated by newlines
-  // to minimize API calls, then split back
-  if (toTranslate.length === 0) return tableStr;
+  if (toTranslate.length === 0) return { text: tableStr, provider: "none" };
 
-  // Translate all cells in parallel
-  const translated = await Promise.all(
-    toTranslate.map((cell) => translateChunk(cell, langpair))
+  // Deduplicate cells to avoid redundant API calls
+  const uniqueCells = [...new Set(toTranslate)];
+
+  const results = await Promise.all(
+    uniqueCells.map((cell) => translateWithFallback(cell, from, to))
   );
 
-  // Build a map from original → translated
   const translationMap = new Map<string, string>();
-  toTranslate.forEach((orig, i) => {
-    translationMap.set(orig, translated[i]);
+  uniqueCells.forEach((orig, i) => {
+    translationMap.set(orig, results[i].text);
   });
 
-  // Apply translations
-  const trHeader = header.map(
-    (c) => translationMap.get(c) ?? c
-  );
+  const trHeader = header.map((c) => translationMap.get(c) ?? c);
   const trBody = body.map((row) =>
     row.map((c) => translationMap.get(c) ?? c)
   );
 
-  return reassembleTable(trHeader, separator, trBody);
+  // Use the provider from the first successful translation
+  const provider = results.find((r) => r.provider !== "none")?.provider ?? "none";
+
+  return { text: reassembleTable(trHeader, separator, trBody), provider };
 }
 
 export async function POST(req: NextRequest) {
   const { text, langpair = "ko|en" } = await req.json();
+  if (!text || typeof text !== "string") {
+    return NextResponse.json({ translated: "", provider: "none" });
+  }
+  if (text.length > MAX_INPUT_LENGTH) {
+    return NextResponse.json({ error: "Input too large" }, { status: 413 });
+  }
+  const { from, to } = parseLangpair(langpair);
 
   // Shield markdown blocks (tables, code fences, inline code) before translation
   const { text: shielded, blocks } = shieldMarkdown(text);
 
-  // Translate prose
+  // Translate prose chunks
   const chunks = splitIntoChunks(shielded);
-  const translated = await Promise.all(
-    chunks.map((c) => translateChunk(c, langpair))
+  const results = await Promise.all(
+    chunks.map((c) => translateWithFallback(c, from, to))
   );
-  const joined = translated.join(" ");
+  const joined = results.map((r) => r.text).join(" ");
+
+  // Track which provider was used (first successful chunk)
+  let provider = results.find((r) => r.provider !== "none")?.provider ?? "none";
 
   // Translate table blocks cell-by-cell
   for (const block of blocks) {
     if (block.type === "table") {
-      block.content = await translateTable(block.content, langpair);
+      const tableResult = await translateTable(block.content, from, to);
+      block.content = tableResult.text;
+      if (provider === "none" && tableResult.provider !== "none") {
+        provider = tableResult.provider;
+      }
     }
   }
 
@@ -110,5 +120,5 @@ export async function POST(req: NextRequest) {
   const restored =
     blocks.length > 0 ? unshieldMarkdown(joined, blocks) : joined;
 
-  return NextResponse.json({ translated: restored });
+  return NextResponse.json({ translated: restored, provider });
 }

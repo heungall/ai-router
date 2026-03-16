@@ -29,19 +29,19 @@ export default function QuestionInput({ onSubmit, disabled }: QuestionInputProps
   const isEmpty = !question.trim() || !!disabled;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <textarea
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="한국어로 질문을 입력하세요"
         rows={4}
-        className="w-full resize-none text-sm text-slate-800 placeholder-slate-300 focus:outline-none leading-relaxed px-4 pt-4 pb-2"
+        className="w-full resize-none text-sm text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none leading-relaxed px-4 pt-4 pb-2"
       />
-      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">응답 길이</span>
-          <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium bg-white">
+          <span className="text-xs text-slate-400 dark:text-slate-500">응답 길이</span>
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden text-xs font-medium bg-white dark:bg-slate-700">
             {(["short", "normal"] as ResponseLength[]).map((len) => (
               <button
                 key={len}
@@ -50,14 +50,14 @@ export default function QuestionInput({ onSubmit, disabled }: QuestionInputProps
                 className={`px-3 py-1.5 transition-colors ${
                   responseLength === len
                     ? "bg-blue-600 text-white"
-                    : "text-slate-500 hover:bg-slate-50"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600"
                 }`}
               >
                 {len === "short" ? "짧게" : "보통"}
               </button>
             ))}
           </div>
-          <span className="text-xs text-slate-300">{question.length}자</span>
+          <span className="text-xs text-slate-300 dark:text-slate-600">{question.length}자</span>
         </div>
         <button
           type="button"
