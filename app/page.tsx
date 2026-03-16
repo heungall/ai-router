@@ -11,6 +11,7 @@ import { generatePrompt, type GeneratedPrompt } from "@/lib/generatePrompt";
 import { loadFillers } from "@/lib/fillerStore";
 import { loadIntentRules, type IntentRule } from "@/lib/intentStore";
 import type { ResponseLength } from "@/lib/promptTemplates";
+import { translateWithLingva } from "@/lib/lingvaClient";
 
 export default function Home() {
   const [promptResult, setPromptResult] = useState<GeneratedPrompt | null>(null);
@@ -29,6 +30,14 @@ export default function Home() {
   async function handleQuestionSubmit(question: string, responseLength: ResponseLength) {
     setTranslating(true);
     try {
+      // Try Lingva client-side first (bypasses Vercel 403)
+      const lingvaResult = await translateWithLingva(question, "ko", "en");
+      if (lingvaResult) {
+        setQuestionProvider("Lingva");
+        setPromptResult(generatePrompt(question, responseLength, lingvaResult, fillers, intentRules));
+        return;
+      }
+      // Fallback to server API (MyMemory)
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,6 +57,14 @@ export default function Home() {
   async function handleResponseSubmit(englishText: string) {
     setTranslatingResponse(true);
     try {
+      // Try Lingva client-side first (bypasses Vercel 403)
+      const lingvaResult = await translateWithLingva(englishText, "en", "ko");
+      if (lingvaResult) {
+        setKoreanText(lingvaResult);
+        setResponseProvider("Lingva");
+        return;
+      }
+      // Fallback to server API (MyMemory + markdown shield/repair)
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
